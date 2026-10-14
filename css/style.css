@@ -308,3 +308,16 @@ textarea { min-height: 120px; resize: vertical; }
 
 footer { background: var(--d); color: #fff; padding: 36px 0; font-size: .95rem; }
 footer .w { display: flex; flex-wrap: wrap; gap: 12px 30px; align-items: center; justify-content: space-between; }
+
+/* Odstęp dla nagłówka strony, żeby nie chował się pod menu */
+.ph {
+  padding: 56px 0;
+  background: var(--t);
+  border-bottom: 2px solid var(--d);
+  margin-top: 0; /* upewnij się, że nie ma ujemnych marginesów */
+}
+
+/* Pierwsza sekcja zaraz pod sticky headerem musi mieć margines */
+header + main > section:first-of-type {
+  padding-top: 40px;
+}
