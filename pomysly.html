@@ -1,156 +1,100 @@
 <!DOCTYPE html>
 <html lang="pl">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Pomysły – VIA KATOLIK</title>
-		<link rel="icon" href="assets/logo-kolor.png">
-		<meta name="description" content="VIA KATOLIK – komitet uczniowski szkoły katolickiej w Opolu.">
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="css/style.css">
-	</head>
-	<body>
-		<header>
-			<div class="w">
-				<a class="logo" href="index.html" aria-label="VIA KATOLIK – start">
-					<img src="assets/logo-kolor.png" alt="VIA KATOLIK">
-				</a>
-				<button id="mb" aria-expanded="false" aria-controls="nav">Menu</button>
-				<nav id="nav" aria-label="Główna">
-					<a href="index.html">Start</a>
-					<a href="program.html">Program</a>
-					<a href="pomysly.html" class="on" aria-current="page">Pomysły</a>
-					<a href="o-nas.html">O nas</a>
-				</nav>
-			</div>
-		</header>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Pomysły – VIA KATOLIK</title>
+    <link rel="icon" href="assets/logo-kolor.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header>
+  <div class="w">
+    <a class="logo" href="index.html" aria-label="VIA KATOLIK – start"><img src="assets/logo-kolor.png" alt="VIA KATOLIK"></a>
+    <button id="mb" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav id="nav" aria-label="Główna">
+      <a href="index.html">Start</a>
+      <a href="program.html">Program</a>
+      <a href="pomysly.html" class="on" aria-current="page">Pomysły</a>
+      <a href="o-nas.html">O nas</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="ph"><div class="w"><h1>Twoje <span class="hl">pomysły</span></h1><p class="lead">Zgłoś propozycję i śledź jej status.</p></div></section>
+<section class="s" id="form"><div class="w grid two"><div><h2>Zgłoś <span class="hl">pomysł</span></h2><p>Opisz krótko, o co chodzi i po co.</p></div>
+<form id="f"><label>Tytuł pomysłu<input name="t" required maxlength="80"></label>
+<label>Opis<textarea name="d" required maxlength="500"></textarea></label>
+<label>Kategoria<select name="c"><option>Wydarzenia</option><option>Dni tematyczne</option><option>Modlitwa i Msze</option><option>Szkoła i organizacja</option><option>Inne</option></select></label>
+<label>Imię lub klasa (opcjonalnie)<input name="a" maxlength="40"></label>
+<button class="btn" type="submit">Wyślij pomysł</button><p class="note" id="m" role="status"></p></form></div></section>
 
-		<main>
-			<section class="ph">
-				<div class="w">
-					<h1>Twoje <span class="hl">pomysły</span></h1>
-					<p class="lead">Zgłoś propozycję i śledź jej status. Możesz też wrzucić kartkę do skrzynki Katolik Vox w szkole.</p>
-				</div>
-			</section>
+<section class="s t" id="tablica"><div class="w"><h2>Tablica <span class="hl">statusów</span></h2>
+<div class="fl" id="fl"><button class="on" data-s="">Wszystkie</button><button data-s="Zgłoszony">Zgłoszone</button><button data-s="W głosowaniu">W głosowaniu</button><button data-s="W realizacji">W realizacji</button><button data-s="Zrealizowany">Zrealizowane</button></div>
+<div class="grid three" id="b"></div></div></section></main>
 
-			<section class="s" id="form">
-				<div class="w grid two">
-					<div>
-						<h2>Zgłoś <span class="hl">pomysł</span></h2>
-						<p>Opisz krótko, o co chodzi i po co.</p>
-					</div>
-					<form id="f">
-						<label>
-							Tytuł pomysłu
-							<input name="t" required maxlength="80">
-						</label>
-						<label>
-							Opis
-							<textarea name="d" required maxlength="500"></textarea>
-						</label>
-						<label>
-							Kategoria
-							<select name="c">
-								<option>Wydarzenia</option>
-								<option>Dni tematyczne</option>
-								<option>Modlitwa i Msze</option>
-								<option>Szkoła i organizacja</option>
-								<option>Inne</option>
-							</select>
-						</label>
-						<label>
-							Imię lub klasa (opcjonalnie)
-							<input name="a" maxlength="40">
-						</label>
-						<button class="btn" type="submit">Wyślij pomysł</button>
-						<p class="note" id="m" role="status"></p>
-					</form>
-				</div>
-			</section>
+<footer><div class="w"><img src="assets/logo-biel.png" alt="VIA KATOLIK" style="height:64px;width:auto"><span>Samorząd uczniowski szkoły katolickiej</span><span><a href="pomysly.html">Zgłoś pomysł</a></span></div></footer>
 
-			<section class="s t" id="tablica">
-				<div class="w">
-					<h2>Tablica <span class="hl">statusów</span></h2>
-					<div class="fl" id="fl">
-						<button class="on" data-s="">Wszystkie</button>
-						<button data-s="Zgłoszony">Zgłoszone</button>
-						<button data-s="W głosowaniu">W głosowaniu</button>
-						<button data-s="W realizacji">W realizacji</button>
-						<button data-s="Zrealizowany">Zrealizowane</button>
-					</div>
-					<div class="grid three" id="b"></div>
-					<p class="note" style="margin-top: 20px">Przykładowe wpisy do podmiany. Aby zgłoszenia trafiały do samorządu, podłącz formularz do Google Forms lub Formspree.</p>
-				</div>
-			</section>
-		</main>
+<script>
+const SUPABASE_URL = 'https://vbohrgapyspzbmjccasw.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'sb_publishable_54BBj6DVIkUKCyunEWggSA_Q9etozpc';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-		<footer>
-			<div class="w">
-				<img src="assets/logo-biel.png" alt="VIA KATOLIK" style="height: 64px; width: auto">
-				<span>Samorząd uczniowski szkoły katolickiej</span>
-				<span>
-					<a href="pomysly.html">Zgłoś pomysł</a>
-				</span>
-			</div>
-		</footer>
+const b=document.getElementById('mb'),n=document.getElementById('nav');b.onclick=()=>{b.setAttribute('aria-expanded',n.classList.toggle('open'))};
+const C={"Zgłoszony":"n","W głosowaniu":"v","W realizacji":"w","Zrealizowany":"z"}, board = document.getElementById('b'); let currentFilter = "";
 
-		<script>
-			const b = document.getElementById('mb');
-			const n = document.getElementById('nav');
-			b.onclick = () => {
-				b.setAttribute('aria-expanded', n.classList.toggle('open'));
-			};
+const e = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-			const D = [
-				["Dzień Pluszaka w pierwszym tygodniu zimy", "Dni tematyczne", "Zrealizowany"],
-				["Playlista na przerwy wybierana przez uczniów", "Wydarzenia", "W realizacji"],
-				["Ankieta o motywie dnia przed Adwentem", "Modlitwa i Msze", "W głosowaniu"],
-				["Więcej ławek na korytarzu", "Szkoła i organizacja", "Zgłoszony"]
-			];
-			const C = {
-				"Zgłoszony": "n",
-				"W głosowaniu": "v",
-				"W realizacji": "w",
-				"Zrealizowany": "z"
-			};
-			const b = document.getElementById('b');
-			let f = "";
+async function loadIdeas() {
+  const { data, error } = await db.from('ideas').select('*').eq('is_approved', true).order('created_at', { ascending: false });
+  if (error) { board.innerHTML = "<p>Błąd ładowania danych.</p>"; return; }
+  
+  const filtered = data.filter(x => !currentFilter || x.status === currentFilter);
+  board.innerHTML = filtered.map(x => `
+    <article class="card">
+      <span class="st ${C[x.status] || 'n'}">${e(x.status)}</span>
+      <h3>${e(x.title)}</h3>
+      <p>${e(x.description)}</p>
+      <span class="tag">${e(x.category)}</span>
+      ${x.author ? `<p class="note">Zgłosił(a): ${e(x.author)}</p>` : ''}
+    </article>
+  `).join('') || "<p>Brak zaakceptowanych pomysłów w tym statusie.</p>";
+}
 
-			const e = s => s.replace(/[&<>"]/g, c => ({
-				"&": "&amp;",
-				"<": "&lt;",
-				">": "&gt;",
-				'"': "&quot;"
-			}[c]));
+document.getElementById('fl').onclick = ev => {
+  if (ev.target.dataset.s === undefined) return;
+  currentFilter = ev.target.dataset.s;
+  document.querySelectorAll('#fl button').forEach(x => x.classList.toggle('on', x === ev.target));
+  loadIdeas();
+};
 
-			function r() {
-				b.innerHTML = D
-					.filter(x => !f || x[2] == f)
-					.map(x => `<article class="card"><span class="st ${C[x[2]]}">${x[2]}</span><h3>${e(x[0])}</h3><span class="tag">${e(x[1])}</span></article>`)
-					.join("") || "<p>Brak pomysłów w tym statusie.</p>";
-			}
+document.getElementById('f').onsubmit = async ev => {
+  ev.preventDefault();
+  const d = new FormData(ev.target);
+  const msg = document.getElementById('m');
+  msg.textContent = "Wysyłanie...";
 
-			document.getElementById('fl').onclick = ev => {
-				if (ev.target.dataset.s === undefined) return;
-				f = ev.target.dataset.s;
-				document.querySelectorAll('#fl button').forEach(x => {
-					x.classList.toggle('on', x == ev.target);
-				});
-				r();
-			};
+  const { error } = await db.from('ideas').insert([{
+    title: d.get('t'),
+    description: d.get('d'),
+    category: d.get('c'),
+    author: d.get('a')
+  }]);
 
-			document.getElementById('f').onsubmit = ev => {
-				ev.preventDefault();
-				const d = new FormData(ev.target);
-				D.unshift([d.get('t'), d.get('c'), "Zgłoszony"]);
-				ev.target.reset();
-				document.getElementById('m').textContent = "Dziękujemy! Pomysł dodany ze statusem Zgłoszony (na tej stronie, dopóki nie podłączysz formularza).";
-				r();
-			};
+  if (error) {
+    msg.textContent = "Wystąpił błąd podczas wysyłania zgłoszenia.";
+  } else {
+    ev.target.reset();
+    msg.textContent = "Dziękujemy! Pomysł został wysłany i czeka na akceptację przez samorząd.";
+  }
+};
 
-			r();
-		</script>
-	</body>
+loadIdeas();
+</script>
+</body>
 </html>
