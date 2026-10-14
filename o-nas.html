@@ -1,0 +1,84 @@
+<!DOCTYPE html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>O nas – VIA KATOLIK</title><link rel="icon" href="assets/logo-kolor.png"><meta name="description" content="VIA KATOLIK – komitet uczniowski szkoły katolickiej w Opolu.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--d:#1E1740;--l:#A576FF;--t:#F6F3FF}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font:16px/1.7 'Montserrat',system-ui,sans-serif;color:var(--d);background:#fff;overflow-x:hidden}
+h1,h2,h3{font-family:'Montserrat',system-ui,sans-serif;line-height:1.2;letter-spacing:-.01em;font-weight:800;text-transform:uppercase}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--l);outline-offset:3px}
+.hl{background:var(--l);color:var(--d);padding:.04em .2em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.w{max-width:1100px;margin:auto;padding:0 20px}
+.s{padding:72px 0}.t{background:var(--t)}.d{background:var(--d);color:#fff}
+h2{font-size:clamp(1.5rem,5vw,2.5rem);margin-bottom:18px}
+.lead{font-size:1.1rem;max-width:62ch}
+header{position:sticky;top:0;z-index:9;background:#fff;border-bottom:2px solid var(--d)}
+header .w{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo img{height:46px;width:auto;display:block}
+nav{display:flex;gap:6px}
+nav a{text-decoration:none;font-weight:600;padding:6px 12px}
+nav a.on{background:var(--l)}
+nav a:hover{background:var(--t)}nav a.on:hover{background:var(--l)}
+#mb{display:none;background:var(--d);color:#fff;border:0;padding:8px 14px;font-family:inherit;font-weight:700;font-size:.95rem;cursor:pointer}
+@media(max-width:760px){#mb{display:block}
+nav{display:none;position:absolute;top:64px;left:0;right:0;background:#fff;flex-direction:column;padding:10px 20px 20px;border-bottom:2px solid var(--d)}
+nav.open{display:flex}nav a{padding:12px;font-size:1.15rem}}
+.hero{background:var(--d);color:#fff;padding:56px 0 72px;position:relative;overflow:hidden}
+.hero h1{font-size:clamp(1.9rem,8vw,6.2rem);line-height:1.15}
+.hero h1 span{display:block}
+.hero h1 .hl{display:inline-block;margin-top:.12em}
+.hero p{font-size:1.1rem;max-width:52ch;margin:28px 0}
+.sticker{position:absolute;right:-30px;top:40px;width:180px;height:180px;border-radius:50%;border:3px dashed var(--l);transform:rotate(12deg);display:grid;place-items:center;text-align:center;font:800 1.1rem 'Montserrat',sans-serif;color:var(--l);padding:30px}
+@media(max-width:760px){.sticker{display:none}}
+.btn{display:inline-block;background:var(--l);color:var(--d);font-weight:700;padding:14px 24px;text-decoration:none;border:2px solid var(--d);box-shadow:5px 5px 0 var(--d);margin:0 10px 12px 0;cursor:pointer;font-family:inherit;font-size:1rem;transition:transform .15s,box-shadow .15s}
+.d .btn,.hero .btn{box-shadow:5px 5px 0 #fff;border-color:#fff}
+.btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--d)}
+.btn.o{background:transparent;color:inherit}
+.list{border-top:2px solid var(--d);margin-top:30px}
+.row{display:grid;gap:8px 28px;padding:24px 8px;border-bottom:2px solid var(--d)}
+.row:hover{background:#fff}
+.t .row:hover{background:#fff}
+.row h3{font-size:1.2rem}
+.row ul{padding-left:1.1em;margin-top:8px}
+.tag{display:inline-block;background:var(--l);color:var(--d);font-size:.85rem;font-weight:700;padding:2px 12px;border-radius:99px;width:max-content;height:max-content}
+@media(min-width:820px){.row{grid-template-columns:160px 1fr 1.4fr;align-items:start}.row .tag{margin-top:8px}}
+.links{display:grid;gap:18px}
+@media(min-width:820px){.links{grid-template-columns:repeat(3,1fr)}}
+.link{display:block;padding:26px;border:2px solid var(--d);text-decoration:none;background:#fff;box-shadow:6px 6px 0 var(--l);transition:transform .15s}
+.link:hover{transform:translateY(-4px)}
+.link h3{font-size:1.15rem;margin-bottom:6px}
+.ph{padding:56px 0;background:var(--t);border-bottom:2px solid var(--d)}
+.ph h1{font-size:clamp(1.7rem,6.5vw,3.6rem)}
+.ph p{margin-top:16px}
+.grid{display:grid;gap:18px}
+@media(min-width:820px){.two{grid-template-columns:1fr 1.5fr;gap:48px}.three{grid-template-columns:repeat(3,1fr)}}
+form{display:grid;gap:14px}
+label{font-weight:700;display:grid;gap:6px}
+input,select,textarea{font:inherit;padding:12px;border:2px solid var(--d);background:#fff;color:var(--d);width:100%;border-radius:0}
+textarea{min-height:120px;resize:vertical}
+.fl{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}
+.fl button{font-family:inherit;font-weight:600;font-size:.95rem;padding:7px 16px;border:2px solid var(--d);background:#fff;color:var(--d);cursor:pointer}
+.fl button.on{background:var(--d);color:#fff}
+.card{background:#fff;border:2px solid var(--d);padding:20px;display:grid;gap:8px;align-content:start}
+.card h3{font-size:1.25rem}
+.st{font-size:.85rem;font-weight:700;padding:2px 12px;width:max-content;border:2px solid var(--d)}
+.st.n{background:#fff}.st.v{background:var(--t)}.st.w{background:var(--l)}.st.z{background:var(--d);color:#fff}
+.note{font-size:.9rem;opacity:.75}
+.mem{border:2px solid var(--d);background:#fff;padding:20px}
+.av{width:64px;height:64px;background:var(--l);border:2px solid var(--d);display:grid;place-items:center;font:800 1.4rem 'Montserrat',sans-serif;margin-bottom:10px}
+footer{background:var(--d);color:#fff;padding:36px 0;font-size:.95rem}
+footer .w{align-items:center;display:flex;flex-wrap:wrap;gap:12px 30px;justify-content:space-between}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style></head><body>
+<header><div class="w"><a class="logo" href="index.html" aria-label="VIA KATOLIK – start"><img src="assets/logo-kolor.png" alt="VIA KATOLIK"></a><button id="mb" aria-expanded="false" aria-controls="nav">Menu</button><nav id="nav" aria-label="Główna"><a href="index.html">Start</a><a href="program.html">Program</a><a href="pomysly.html">Pomysły</a><a href="o-nas.html" class="on" aria-current="page">O nas</a></nav></div></header>
+<main>
+<section class="ph"><div class="w"><h1>Cześć, my to <span class="hl">VIA KATOLIK</span></h1><p class="lead">Grupa uczniów szkoły katolickiej w Opolu, która chce, żeby szkoła była bliżej wiary, wspólnoty i uczniów.</p></div></section>
+<section class="s"><div class="w"><h2>Nasz <span class="hl">zespół</span></h2><div class="grid three"><div class="mem"><div class="av">P</div><h3>Imię Nazwisko</h3><p>Przewodniczący/a</p></div><div class="mem"><div class="av">W</div><h3>Imię Nazwisko</h3><p>Wiceprzewodniczący/a</p></div><div class="mem"><div class="av">K</div><h3>Imię Nazwisko</h3><p>Koordynator/ka mediów</p></div><div class="mem"><div class="av">K</div><h3>Imię Nazwisko</h3><p>Koordynator/ka wydarzeń</p></div><div class="mem"><div class="av">K</div><h3>Imię Nazwisko</h3><p>Koordynator/ka duchowy</p></div><div class="mem"><div class="av">S</div><h3>Imię Nazwisko</h3><p>Skarbnik / sekretarz</p></div></div><p class="note" style="margin-top:16px">Uzupełnij imiona, zdjęcia i krótkie opisy.</p></div></section>
+<section class="s d" id="kontakt"><div class="w grid two"><h2>Napisz <span class="hl">do nas</span></h2><div><p class="lead">Najszybciej przez Instagram lub Teamsy. Możesz też użyć formularza pomysłów albo skrzynki w szkole.</p>
+<p style="margin:18px 0"><strong>Instagram:</strong> @twoj_profil<br><strong>E-mail:</strong> adres@twojaszkola.pl<br><strong>Skrzynka Katolik Vox:</strong> uzupełnij lokalizację w szkole</p><a class="btn" href="pomysly.html#form">Zgłoś pomysł</a></div></div></section></main>
+<footer><div class="w"><img src="assets/logo-biel.png" alt="VIA KATOLIK" style="height:64px;width:auto"><span>Samorząd uczniowski szkoły katolickiej</span><span>
+<a href="pomysly.html">Zgłoś pomysł</a></span></div></footer>
+<script>const b=document.getElementById('mb'),n=document.getElementById('nav');b.onclick=()=>{b.setAttribute('aria-expanded',n.classList.toggle('open'))};</script></body></html>
