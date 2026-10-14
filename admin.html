@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Panel Administracyjny – VIA KATOLIK</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      .admin-card { background: #fff; border: 2px solid var(--d); padding: 16px; margin-bottom: 12px; display: grid; gap: 8px; }
+      .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    </style>
+</head>
+<body>
+<header><div class="w"><h2>Panel Administracyjny</h2></div></header>
+<main class="s"><div class="w">
+
+  <div id="login-section">
+    <h2>Logowanie</h2>
+    <form id="login-form">
+      <label>E-mail admina<input type="email" id="email" required></label>
+      <label>Hasło<input type="password" id="password" required></label>
+      <button class="btn" type="submit">Zaloguj się</button>
+      <p id="login-msg" class="note"></p>
+    </form>
+  </div>
+
+  <div id="admin-section" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2>Zgłoszenia uczniów</h2>
+      <button class="btn o" id="logout">Wyloguj się</button>
+    </div>
+    <div id="ideas-list"></div>
+  </div>
+
+</div></main>
+
+<script>
+const SUPABASE_URL = 'TWOJ_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'TWOJ_SUPABASE_ANON_KEY';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const loginForm = document.getElementById('login-form');
+const loginSection = document.getElementById('login-section');
+const adminSection = document.getElementById('admin-section');
+const list = document.getElementById('ideas-list');
+
+loginForm.onsubmit = async ev => {
+  ev.preventDefault();
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const { error } = await db.auth.signInWithPassword({ email, password });
+  if (error) { document.getElementById('login-msg').textContent = "Błąd logowania: " + error.message; }
+  else { checkAuth(); }
+};
+
+document.getElementById('logout').onclick = async () => {
+  await db.auth.signOut();
+  checkAuth();
+};
+
+async function checkAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    loginSection.style.display = 'none';
+    adminSection.style.display = 'block';
+    fetchAdminIdeas();
+  } else {
+    loginSection.style.display = 'block';
+    adminSection.style.display = 'none';
+  }
+}
+
+async function fetchAdminIdeas() {
+  const { data, error } = await db.from('ideas').select('*').order('created_at', { ascending: false });
+  if (error) { list.innerHTML = "<p>Błąd wczytywania danych.</p>"; return; }
+
+  list.innerHTML = data.map(item => `
+    <div class="admin-card">
+      <div>
+        <strong>Status:</strong> ${item.status} | 
+        <strong>Zaakceptowane:</strong> ${item.is_approved ? 'TAK' : 'NIE (Czeka)'}
+      </div>
+      <h3>${item.title}</h3>
+      <p>${item.description}</p>
+      <p class="note">Kategoria: ${item.category} | Autor: ${item.author || 'Anonim'}</p>
+      <div class="actions">
+        ${!item.is_approved ? `<button class="btn" onclick="approveIdea(${item.id})">Zaakceptuj i Opublikuj</button>` : ''}
+        <select onchange="updateStatus(${item.id}, this.value)">
+          <option value="Zgłoszony" ${item.status === 'Zgłoszony' ? 'selected' : ''}>Status: Zgłoszony</option>
+          <option value="W głosowaniu" ${item.status === 'W głosowaniu' ? 'selected' : ''}>Status: W głosowaniu</option>
+          <option value="W realizacji" ${item.status === 'W realizacji' ? 'selected' : ''}>Status: W realizacji</option>
+          <option value="Zrealizowany" ${item.status === 'Zrealizowany' ? 'selected' : ''}>Status: Zrealizowany</option>
+        </select>
+        <button class="btn o" style="border-color:#ff7676; color:#ff7676;" onclick="deleteIdea(${item.id})">Usuń</button>
+      </div>
+    </div>
+  `).join('') || "<p>Brak zgłoszeń w bazie.</p>";
+}
+
+async function approveIdea(id) {
+  await db.from('ideas').update({ is_approved: true }).eq('id', id);
+  fetchAdminIdeas();
+}
+
+async function updateStatus(id, newStatus) {
+  await db.from('ideas').update({ status: newStatus }).eq('id', id);
+  fetchAdminIdeas();
+}
+
+async function deleteIdea(id) {
+  if (confirm("Czy na pewno chcesz usunąć to zgłoszenie?")) {
+    await db.from('ideas').delete().eq('id', id);
+    fetchAdminIdeas();
+  }
+}
+
+checkAuth();
+</script>
+</body>
+</html>
