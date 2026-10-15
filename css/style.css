@@ -322,13 +322,9 @@ header + main > section:first-of-type {
   padding-top: 40px;
 }
 
-.link {
-  display: inline-block;
-  padding: 10px 16px;
-  background-color: var(--d); /* lub Twój kolor główny przycisku */
-  color: #fff;
-  text-decoration: none;
-  border-radius: 4px;
-  font-weight: bold;
-  /* inne właściwości przycisków */
-}
+@media(min-width:820px){.row{grid-template-columns:160px 1fr 1.4fr;align-items:start}.row .tag{margin-top:8px}}
+.links{display:grid;gap:18px}
+@media(min-width:820px){.links{grid-template-columns:repeat(3,1fr)}}
+.link{display:block;padding:26px;border:2px solid var(--d);text-decoration:none;background:#fff;box-shadow:6px 6px 0 var(--l);transition:transform .15s}
+.link:hover{transform:translateY(-4px)}
+.link h3{font-size:1.15rem;margin-bottom:6px}
