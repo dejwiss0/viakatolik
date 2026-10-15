@@ -321,3 +321,14 @@ footer .w { display: flex; flex-wrap: wrap; gap: 12px 30px; align-items: center;
 header + main > section:first-of-type {
   padding-top: 40px;
 }
+
+.link {
+  display: inline-block;
+  padding: 10px 16px;
+  background-color: var(--d); /* lub Twój kolor główny przycisku */
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+  /* inne właściwości przycisków */
+}
