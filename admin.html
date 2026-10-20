@@ -31,6 +31,16 @@
       <button class="btn o" id="logout">Wyloguj się</button>
     </div>
     <div id="ideas-list"></div>
+
+    <div style="margin-top: 40px; border-top: 2px solid var(--d); padding-top: 20px;">
+      <h2>Zarządzanie ankietami</h2>
+      <form id="poll-form" style="margin-bottom: 20px;">
+        <label>Pytanie ankiety<input type="text" id="poll-question" required></label>
+        <label>Opcje odpowiedzi (oddzielone przecinkami)<input type="text" id="poll-options" placeholder="np. Tak, Nie, Nie wiem" required></label>
+        <button class="btn" type="submit">Utwórz ankietę</button>
+      </form>
+      <div id="admin-polls-list"></div>
+    </div>
   </div>
 
 </div></main>
@@ -39,7 +49,6 @@
 const SUPABASE_URL = 'https://vbohrgapyspzbmjccasw.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_54BBj6DVIkUKCyunEWggSA_Q9etozpc';
 
-// Jawna inicjalizacja zapobiegająca błędom ścieżek w v2
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
@@ -51,6 +60,8 @@ const loginForm = document.getElementById('login-form');
 const loginSection = document.getElementById('login-section');
 const adminSection = document.getElementById('admin-section');
 const list = document.getElementById('ideas-list');
+
+const e = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 loginForm.onsubmit = async ev => {
   ev.preventDefault();
@@ -72,6 +83,7 @@ async function checkAuth() {
     loginSection.style.display = 'none';
     adminSection.style.display = 'block';
     fetchAdminIdeas();
+    fetchAdminPolls();
   } else {
     loginSection.style.display = 'block';
     adminSection.style.display = 'none';
@@ -85,14 +97,15 @@ async function fetchAdminIdeas() {
   list.innerHTML = data.map(item => `
     <div class="admin-card">
       <div>
-        <strong>Status:</strong> ${item.status} | 
+        <strong>Status:</strong> ${e(item.status)} | 
         <strong>Zaakceptowane:</strong> ${item.is_approved ? 'TAK' : 'NIE (Czeka)'}
       </div>
-      <h3>${item.title}</h3>
-      <p>${item.description}</p>
-      <p class="note">Kategoria: ${item.category} | Autor: ${item.author || 'Anonim'}</p>
+      <h3>${e(item.title)}</h3>
+      <p>${e(item.description)}</p>
+      <p class="note">Kategoria: ${e(item.category)} | Autor: ${e(item.author || 'Anonim')}</p>
       <div class="actions">
         ${!item.is_approved ? `<button class="btn" onclick="approveIdea(${item.id})">Zaakceptuj i Opublikuj</button>` : ''}
+        ${item.is_approved ? `<button class="btn o" onclick="toggleFeature(${item.id}, ${item.is_featured})">${item.is_featured ? '⭐ Cofnij wyróżnienie' : '⭐ Wyróżnij na start'}</button>` : ''}
         <select onchange="updateStatus(${item.id}, this.value)">
           <option value="Zgłoszony" ${item.status === 'Zgłoszony' ? 'selected' : ''}>Status: Zgłoszony</option>
           <option value="W głosowaniu" ${item.status === 'W głosowaniu' ? 'selected' : ''}>Status: W głosowaniu</option>
@@ -119,6 +132,65 @@ async function deleteIdea(id) {
   if (confirm("Czy na pewno chcesz usunąć to zgłoszenie?")) {
     await db.from('ideas').delete().eq('id', id);
     fetchAdminIdeas();
+  }
+}
+
+async function toggleFeature(id, currentStatus) {
+  const { error } = await db.from('ideas').update({ is_featured: !currentStatus }).eq('id', id);
+  if (error) {
+    alert("Błąd podczas aktualizacji wyróżnienia: " + error.message);
+  } else {
+    fetchAdminIdeas();
+  }
+}
+
+document.getElementById('poll-form').onsubmit = async ev => {
+  ev.preventDefault();
+  const question = document.getElementById('poll-question').value;
+  const optionsInput = document.getElementById('poll-options').value;
+
+  const optionsArray = optionsInput.split(',').map(opt => ({
+    text: opt.trim(),
+    votes: 0
+  })).filter(opt => opt.text.length > 0);
+
+  const { error } = await db.from('polls').insert([{
+    question: question,
+    options: optionsArray,
+    is_active: true
+  }]);
+
+  if (error) {
+    alert("Błąd tworzenia ankiety: " + error.message);
+  } else {
+    alert("Ankieta została utworzona!");
+    document.getElementById('poll-form').reset();
+    fetchAdminPolls();
+  }
+};
+
+async function fetchAdminPolls() {
+  const container = document.getElementById('admin-polls-list');
+  const { data, error } = await db.from('polls').select('*').order('created_at', { ascending: false });
+
+  if (error || !data) {
+    container.innerHTML = "<p>Brak ankiet.</p>";
+    return;
+  }
+
+  container.innerHTML = data.map(poll => `
+    <div class="admin-card">
+      <h3>${e(poll.question)}</h3>
+      <p class="note">Opcje: ${(poll.options || []).map(o => `${e(o.text)} (${o.votes})`).join(' | ')}</p>
+      <button class="btn o" style="border-color:#ff7676; color:#ff7676; width:max-content;" onclick="deletePoll(${poll.id})">Usuń ankietę</button>
+    </div>
+  `).join('') || "<p>Brak stworzonych ankiet.</p>";
+}
+
+async function deletePoll(id) {
+  if (confirm("Czy na pewno chcesz usunąć tę ankietę?")) {
+    await db.from('polls').delete().eq('id', id);
+    fetchAdminPolls();
   }
 }
 
