@@ -36,7 +36,14 @@
 <button class="btn" type="submit">Wyślij pomysł</button><p class="note" id="m" role="status"></p></form></div></section>
 
 <section class="s t" id="tablica"><div class="w"><h2>Tablica <span class="hl">statusów</span></h2>
-<div class="fl" id="fl"><button class="on" data-s="">Wszystkie</button><button data-s="Zgłoszony">Zgłoszone</button><button data-s="W głosowaniu">W głosowaniu</button><button data-s="W realizacji">W realizacji</button><button data-s="Zrealizowany">Zrealizowane</button></div>
+<div class="fl" id="fl">
+  <button class="on" data-s="">Wszystkie</button>
+  <button data-s="Zgłoszony">Zgłoszone</button>
+  <button data-s="Analizowany">Analizowane</button>
+  <button data-s="W trakcie konsultacji">Konsultacje</button>
+  <button data-s="W realizacji">W realizacji</button>
+  <button data-s="Zrealizowany">Zrealizowane</button>
+</div>
 <div class="grid three" id="b"></div></div></section></main>
 
 <footer><div class="w"><img src="assets/logo-biel.png" alt="VIA KATOLIK" style="height:64px;width:auto"><span>Samorząd uczniowski szkoły katolickiej</span><span><a href="pomysly.html">Zgłoś pomysł</a></span></div></footer>
@@ -56,7 +63,14 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const b = document.getElementById('mb'), n = document.getElementById('nav');
 b.onclick = () => { b.setAttribute('aria-expanded', n.classList.toggle('open')); };
 
-const C = {"Zgłoszony":"n","W głosowaniu":"v","W realizacji":"w","Zrealizowany":"z"};
+const C = {
+  "Zgłoszony": "n",
+  "Analizowany": "v",
+  "W trakcie konsultacji": "v",
+  "W realizacji": "w",
+  "Zrealizowany": "z"
+};
+
 const board = document.getElementById('b'); 
 let currentFilter = "";
 

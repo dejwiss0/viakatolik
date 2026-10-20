@@ -116,7 +116,8 @@ async function fetchAdminIdeas() {
         ${item.is_approved ? `<button class="btn o" onclick="toggleFeature(${item.id}, ${item.is_featured})">${item.is_featured ? '⭐ Cofnij wyróżnienie' : '⭐ Wyróżnij na start'}</button>` : ''}
         <select onchange="updateStatus(${item.id}, this.value)">
           <option value="Zgłoszony" ${item.status === 'Zgłoszony' ? 'selected' : ''}>Status: Zgłoszony</option>
-          <option value="W głosowaniu" ${item.status === 'W głosowaniu' ? 'selected' : ''}>Status: W głosowaniu</option>
+          <option value="Analizowany" ${item.status === 'Analizowany' ? 'selected' : ''}>Status: Analizowany</option>
+          <option value="W trakcie konsultacji" ${item.status === 'W trakcie konsultacji' ? 'selected' : ''}>Status: W trakcie konsultacji</option>
           <option value="W realizacji" ${item.status === 'W realizacji' ? 'selected' : ''}>Status: W realizacji</option>
           <option value="Zrealizowany" ${item.status === 'Zrealizowany' ? 'selected' : ''}>Status: Zrealizowany</option>
         </select>
