@@ -70,6 +70,9 @@ b.onclick = () => { b.setAttribute('aria-expanded', n.classList.toggle('open'));
 const pollsContainer = document.getElementById('polls-container');
 const e = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+// Globalna tablica przechowująca pobrane ankiety
+let allPolls = [];
+
 async function loadPolls() {
   const { data: polls, error } = await db.from('polls').select('*').order('created_at', { ascending: false });
   
@@ -77,6 +80,8 @@ async function loadPolls() {
     pollsContainer.innerHTML = "<p>Brak ankiet w tej chwili.</p>";
     return;
   }
+
+  allPolls = polls; // Zapisujemy do zmiennej globalnej
 
   // Pobieramy głosy oddane przez tego użytkownika z tabeli poll_votes
   const { data: userVotes } = await db.from('poll_votes').select('poll_id').eq('user_identifier', userId);
@@ -156,9 +161,9 @@ async function vote(pollId, optionIndex) {
   }
 }
 
-// Poprawiona funkcja generująca i pobierająca grafikę na Instagram Story
+// Funkcja generująca i pobierająca grafikę na Instagram Story
 function generateStoryImage(pollId) {
-  const poll = polls.find(p => p.id === pollId);
+  const poll = allPolls.find(p => p.id === pollId);
   if (!poll) {
     alert("Nie znaleziono danych ankiety.");
     return;
@@ -197,7 +202,7 @@ function generateStoryImage(pollId) {
     const percent = totalVotes > 0 ? Math.round((votesCount / totalVotes) * 100) : 0;
     const rawText = String(opt.text || opt.option || opt.label || '');
 
-    // Rysowanie tła ramki opcji (bezpieczne prostokąty z zaokrąglonymi rogami)
+    // Rysowanie tła ramki opcji
     drawRoundedRect(ctx, 80, startY, 920, 120, 16, '#2A2255');
 
     // Wypełnienie paska postępu % (tylko dla > 0%)
@@ -241,7 +246,7 @@ function generateStoryImage(pollId) {
   document.body.removeChild(link);
 }
 
-// Pomocnicza funkcja rysująca bezpieczne zaokrąglone prostokąty na Canvas
+// Pomocnicza funkcja rysująca zaokrąglone prostokąty na Canvas
 function drawRoundedRect(ctx, x, y, width, height, radius, fillStyle) {
   ctx.fillStyle = fillStyle;
   ctx.beginPath();
