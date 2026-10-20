@@ -112,8 +112,8 @@ async function loadPolls() {
         ${hasVoted && !isClosed ? `<p class="note" style="margin-top: 12px; color: var(--l); font-weight: 700;">✓ Twój głos został zarejestrowany.</p>` : ''}
         
         <!-- Przycisk generowania grafiki na Insta Story -->
-        <button class="btn" style="margin-top: 16px; width: 100%; font-size: 0.9rem;" onclick="generateStoryImage(${poll.id}, '${e(poll.question).replace(/'/g, "\\'")}', '${encodeURIComponent(JSON.stringify(options))}')">
-          📱 Pobierz grafikę na Insta Story
+        <button class="btn" style="margin-top: 16px; width: 100%; font-size: 0.9rem;" onclick="generateStoryImage(${poll.id})">
+            📱 Pobierz grafikę na Insta Story
         </button>
       </article>
     `;
@@ -157,9 +157,17 @@ async function vote(pollId, optionIndex) {
 }
 
 // Poprawiona funkcja generująca grafikę na Instagram Story (Canvas 1080x1920)
-function generateStoryImage(pollId, question, optionsEncoded) {
-  const options = JSON.parse(decodeURIComponent(optionsEncoded));
-  const totalVotes = options.reduce((sum, o) => sum + (o.votes || 0), 0);
+function generateStoryImage(pollId) {
+  // Szukamy ankiety po ID w załadowanej tablicy polls
+  const poll = polls.find(p => p.id === pollId);
+  if (!poll) {
+    alert("Nie znaleziono danych ankiety.");
+    return;
+  }
+
+  const question = poll.question;
+  const options = poll.options || [];
+  const totalVotes = options.reduce((sum, o) => sum + (Number(o.votes) || 0), 0);
 
   const canvas = document.createElement('canvas');
   canvas.width = 1080;
@@ -170,7 +178,7 @@ function generateStoryImage(pollId, question, optionsEncoded) {
   ctx.fillStyle = '#1E1740';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Fioletowa kreska akcentująca
+  // Akcent dekoracyjny
   ctx.fillStyle = '#A576FF';
   ctx.fillRect(80, 160, 120, 16);
 
@@ -186,17 +194,18 @@ function generateStoryImage(pollId, question, optionsEncoded) {
   // Karty opcji
   let startY = 680;
   options.forEach((opt) => {
-    const percent = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+    const votesCount = Number(opt.votes) || 0;
+    const percent = totalVotes > 0 ? Math.round((votesCount / totalVotes) * 100) : 0;
     
-    // Zabezpieczenie przed różnymi nazwami pól w bazie (text / option / label)
-    const rawText = typeof opt === 'string' ? opt : (opt.text || opt.option || opt.label || '');
+    // Pobieramy tekst niezależnie od tego, jak nazywa się klucz w bazie
+    const rawText = String(opt.text || opt.option || opt.label || '');
 
     // Tło ramki
     ctx.fillStyle = '#2A2255';
     ctx.roundRect(80, startY, 920, 120, 16);
     ctx.fill();
 
-    // Wypełnienie paska postępu (tylko dla > 0%)
+    // Wypełnienie paska postępu %
     if (percent > 0) {
       ctx.fillStyle = '#A576FF';
       ctx.beginPath();
@@ -204,21 +213,21 @@ function generateStoryImage(pollId, question, optionsEncoded) {
       ctx.fill();
     }
 
-    // Dynamiczny rozmiar czcionki (żeby długie teksty się nie ucinały i nie nakładały)
+    // Dynamiczny rozmiar czcionki dla długich tekstów
     let fontSize = 32;
-    if (rawText.length > 40) fontSize = 22;
-    else if (rawText.length > 25) fontSize = 26;
+    if (rawText.length > 35) fontSize = 22;
+    else if (rawText.length > 20) fontSize = 26;
 
     // Tekst opcji po lewej
     ctx.fillStyle = '#FFFFFF';
     ctx.font = `bold ${fontSize}px Montserrat, sans-serif`;
     ctx.textAlign = 'left';
-    ctx.fillText(rawText, 110, startY + 68 + (fontSize < 30 ? 2 : 0));
+    ctx.fillText(rawText, 110, startY + 70);
     
-    // Wynik po prawej (zawsze stały rozmiar)
+    // Wynik procentowy i liczba głosów po prawej
     ctx.font = 'bold 32px Montserrat, sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText(`${percent}% (${opt.votes || 0})`, 960, startY + 70);
+    ctx.fillText(`${percent}% (${votesCount})`, 960, startY + 70);
 
     startY += 150;
   });
@@ -229,7 +238,7 @@ function generateStoryImage(pollId, question, optionsEncoded) {
   ctx.font = 'bold 36px Montserrat, sans-serif';
   ctx.fillText('VIA KATOLIK • Samorząd Uczniowski', 80, 1780);
 
-  // Pobieranie obrazu PNG
+  // Pobieranie pliku PNG
   const link = document.createElement('a');
   link.download = `ankieta-${pollId}-wyniki.png`;
   link.href = canvas.toDataURL('image/png');
