@@ -170,7 +170,7 @@ function generateStoryImage(pollId, question, optionsEncoded) {
   ctx.fillStyle = '#1E1740';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Akcent dekoracyjny
+  // Fioletowa kreska akcentująca
   ctx.fillStyle = '#A576FF';
   ctx.fillRect(80, 160, 120, 16);
 
@@ -179,21 +179,24 @@ function generateStoryImage(pollId, question, optionsEncoded) {
   ctx.font = 'bold 48px Montserrat, sans-serif';
   ctx.fillText('WYNIKI ANKIETY', 80, 240);
 
-  // Pytanie (z zawijaniem linii)
+  // Pytanie
   ctx.font = 'bold 56px Montserrat, sans-serif';
   wrapText(ctx, question, 80, 360, 920, 75);
 
-  // Karty opcji i pasków postępu
+  // Karty opcji
   let startY = 680;
   options.forEach((opt) => {
     const percent = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
     
-    // Tło paska opcji
+    // Zabezpieczenie przed różnymi nazwami pól w bazie (text / option / label)
+    const rawText = typeof opt === 'string' ? opt : (opt.text || opt.option || opt.label || '');
+
+    // Tło ramki
     ctx.fillStyle = '#2A2255';
     ctx.roundRect(80, startY, 920, 120, 16);
     ctx.fill();
 
-    // Wypełnienie paska postępu % (tylko jeśli > 0%)
+    // Wypełnienie paska postępu (tylko dla > 0%)
     if (percent > 0) {
       ctx.fillStyle = '#A576FF';
       ctx.beginPath();
@@ -201,32 +204,32 @@ function generateStoryImage(pollId, question, optionsEncoded) {
       ctx.fill();
     }
 
-    // Skracanie bardzo długich tekstów opcji
-    let optionText = String(opt.text || '');
-    if (optionText.length > 30) {
-      optionText = optionText.substring(0, 28) + '...';
-    }
+    // Dynamiczny rozmiar czcionki (żeby długie teksty się nie ucinały i nie nakładały)
+    let fontSize = 32;
+    if (rawText.length > 40) fontSize = 22;
+    else if (rawText.length > 25) fontSize = 26;
 
     // Tekst opcji po lewej
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 32px Montserrat, sans-serif';
+    ctx.font = `bold ${fontSize}px Montserrat, sans-serif`;
     ctx.textAlign = 'left';
-    ctx.fillText(optionText, 110, startY + 72);
+    ctx.fillText(rawText, 110, startY + 68 + (fontSize < 30 ? 2 : 0));
     
-    // Wynik procentowy i liczba głosów po prawej
+    // Wynik po prawej (zawsze stały rozmiar)
+    ctx.font = 'bold 32px Montserrat, sans-serif';
     ctx.textAlign = 'right';
-    ctx.fillText(`${percent}% (${opt.votes || 0})`, 960, startY + 72);
-    ctx.textAlign = 'left';
+    ctx.fillText(`${percent}% (${opt.votes || 0})`, 960, startY + 70);
 
     startY += 150;
   });
 
-  // Stopka / Branding
+  // Stopka
+  ctx.textAlign = 'left';
   ctx.fillStyle = '#A576FF';
   ctx.font = 'bold 36px Montserrat, sans-serif';
   ctx.fillText('VIA KATOLIK • Samorząd Uczniowski', 80, 1780);
 
-  // Pobieranie pliku PNG
+  // Pobieranie obrazu PNG
   const link = document.createElement('a');
   link.download = `ankieta-${pollId}-wyniki.png`;
   link.href = canvas.toDataURL('image/png');
