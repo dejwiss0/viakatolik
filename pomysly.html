@@ -41,12 +41,23 @@
 <footer><div class="w"><img src="assets/logo-biel.png" alt="VIA KATOLIK" style="height:64px;width:auto"><span>Samorząd uczniowski szkoły katolickiej</span><span><a href="pomysly.html">Zgłoś pomysł</a></span></div></footer>
 
 <script>
+// Unikalny identyfikator urządzenia do obsługi polubień
+let userId = localStorage.getItem('viakatolik_user_id');
+if (!userId) {
+  userId = 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+  localStorage.setItem('viakatolik_user_id', userId);
+}
+
 const SUPABASE_URL = 'https://vbohrgapyspzbmjccasw.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_54BBj6DVIkUKCyunEWggSA_Q9etozpc';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const b=document.getElementById('mb'),n=document.getElementById('nav');b.onclick=()=>{b.setAttribute('aria-expanded',n.classList.toggle('open'))};
-const C={"Zgłoszony":"n","W głosowaniu":"v","W realizacji":"w","Zrealizowany":"z"}, board = document.getElementById('b'); let currentFilter = "";
+const b = document.getElementById('mb'), n = document.getElementById('nav');
+b.onclick = () => { b.setAttribute('aria-expanded', n.classList.toggle('open')); };
+
+const C = {"Zgłoszony":"n","W głosowaniu":"v","W realizacji":"w","Zrealizowany":"z"};
+const board = document.getElementById('b'); 
+let currentFilter = "";
 
 const e = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -55,15 +66,23 @@ async function loadIdeas() {
   if (error) { board.innerHTML = "<p>Błąd ładowania danych.</p>"; return; }
   
   const filtered = data.filter(x => !currentFilter || x.status === currentFilter);
-  board.innerHTML = filtered.map(x => `
-    <article class="card">
-      <span class="st ${C[x.status] || 'n'}">${e(x.status)}</span>
-      <h3>${e(x.title)}</h3>
-      <p>${e(x.description)}</p>
-      <span class="tag">${e(x.category)}</span>
-      ${x.author ? `<p class="note">Zgłosił(a): ${e(x.author)}</p>` : ''}
-    </article>
-  `).join('') || "<p>Brak zaakceptowanych pomysłów w tym statusie.</p>";
+  board.innerHTML = filtered.map(x => {
+    const isLiked = localStorage.getItem('liked_' + x.id) === 'true';
+    return `
+      <article class="card">
+        <span class="st ${C[x.status] || 'n'}">${e(x.status)}</span>
+        <h3>${e(x.title)}</h3>
+        <p>${e(x.description)}</p>
+        <span class="tag">${e(x.category)}</span>
+        ${x.author ? `<p class="note">Zgłosił(a): ${e(x.author)}</p>` : ''}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <button class="btn o" onclick="likeIdea(${x.id})" ${isLiked ? 'style="background: var(--l); color: var(--d);"' : ''}>
+            ❤️ Polub (${x.likes_count || 0})
+          </button>
+        </div>
+      </article>
+    `;
+  }).join('') || "<p>Brak zaakceptowanych pomysłów w tym statusie.</p>";
 }
 
 document.getElementById('fl').onclick = ev => {
@@ -75,24 +94,68 @@ document.getElementById('fl').onclick = ev => {
 
 document.getElementById('f').onsubmit = async ev => {
   ev.preventDefault();
-  const d = new FormData(ev.target);
+
+  // Sprawdzenie 2-minutowego limitu (120000 ms)
+  const lastSubmission = localStorage.getItem('last_idea_time');
+  const now = Date.now();
+  const cooldownTime = 120000; 
+
   const msg = document.getElementById('m');
+
+  if (lastSubmission && (now - lastSubmission < cooldownTime)) {
+    const timeLeft = Math.ceil((cooldownTime - (now - lastSubmission)) / 1000);
+    msg.textContent = `Musisz odczekać jeszcze ${timeLeft} sekund przed wysłaniem kolejnego pomysłu.`;
+    return;
+  }
+
+  const d = new FormData(ev.target);
   msg.textContent = "Wysyłanie...";
 
   const { error } = await db.from('ideas').insert([{
     title: d.get('t'),
     description: d.get('d'),
     category: d.get('c'),
-    author: d.get('a')
+    author: d.get('a'),
+    likes_count: 0
   }]);
 
   if (error) {
     msg.textContent = "Wystąpił błąd podczas wysyłania zgłoszenia.";
   } else {
+    localStorage.setItem('last_idea_time', Date.now());
     ev.target.reset();
     msg.textContent = "Dziękujemy! Pomysł został wysłany i czeka na akceptację przez samorząd.";
+    loadIdeas();
   }
 };
+
+async function likeIdea(id) {
+  const likedKey = 'liked_' + id;
+  if (localStorage.getItem(likedKey) === 'true') {
+    alert("Już polubiłeś ten pomysł!");
+    return;
+  }
+
+  const { data: current, error: fetchError } = await db
+    .from('ideas')
+    .select('likes_count')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) return;
+
+  const newCount = (current.likes_count || 0) + 1;
+
+  const { error: updateError } = await db
+    .from('ideas')
+    .update({ likes_count: newCount })
+    .eq('id', id);
+
+  if (!updateError) {
+    localStorage.setItem(likedKey, 'true');
+    loadIdeas();
+  }
+}
 
 loadIdeas();
 </script>
