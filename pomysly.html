@@ -81,6 +81,11 @@ async function loadIdeas() {
             ❤️ Polub (${x.likes_count || 0})
           </button>
         </div>
+        ${x.admin_comment ? `
+        <div style="background: var(--t); border-left: 4px solid var(--l); padding: 10px 14px; margin-top: 10px; font-size: 0.95rem;">
+          <strong>Komentarz Samorządu:</strong> ${e(x.admin_comment)}
+        </div>
+        ` : ''}
       </article>
     `;
   }).join('') || "<p>Brak zaakceptowanych pomysłów w tym statusie.</p>";
