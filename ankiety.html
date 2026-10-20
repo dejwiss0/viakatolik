@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Ankiety – VIA KATOLIK</title>
+    <link rel="icon" href="assets/logo-kolor.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header>
+  <div class="w">
+    <a class="logo" href="index.html" aria-label="VIA KATOLIK – start"><img src="assets/logo-kolor.png" alt="VIA KATOLIK"></a>
+    <button id="mb" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav id="nav" aria-label="Główna">
+      <a href="index.html">Start</a>
+      <a href="program.html">Program</a>
+      <a href="pomysly.html">Pomysły</a>
+      <a href="ankiety.html" class="on" aria-current="page">Ankiety</a>
+      <a href="o-nas.html">O nas</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="ph">
+  <div class="w">
+    <h1>Szkolne <span class="hl">ankiety</span></h1>
+    <p class="lead">Głosuj na bieżące inicjatywy i decyduj razem z nami.</p>
+  </div>
+</section>
+
+<section class="s">
+  <div class="w">
+    <h2>Aktywne <span class="hl">głosowania</span></h2>
+    <div class="grid" id="polls-container" style="margin-top: 24px; gap: 20px;">
+      <p>Ładowanie ankiet...</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="w">
+    <img src="assets/logo-biel.png" alt="VIA KATOLIK" style="height:64px;width:auto">
+    <span>Samorząd uczniowski szkoły katolickiej</span>
+    <span><a href="pomysly.html">Zgłoś pomysł</a></span>
+  </div>
+</footer>
+
+<script>
+// Unikalny identyfikator urządzenia do blokowania wielokrotnego głosowania
+let userId = localStorage.getItem('viakatolik_user_id');
+if (!userId) {
+  userId = 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+  localStorage.setItem('viakatolik_user_id', userId);
+}
+
+const SUPABASE_URL = 'https://vbohrgapyspzbmjccasw.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_54BBj6DVIkUKCyunEWggSA_Q9etozpc';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const b = document.getElementById('mb'), n = document.getElementById('nav');
+b.onclick = () => { b.setAttribute('aria-expanded', n.classList.toggle('open')); };
+
+const pollsContainer = document.getElementById('polls-container');
+const e = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function loadPolls() {
+  const { data: polls, error } = await db.from('polls').select('*').order('created_at', { ascending: false });
+  
+  if (error || !polls || polls.length === 0) {
+    pollsContainer.innerHTML = "<p>Brak aktywnych ankiet w tej chwili.</p>";
+    return;
+  }
+
+  // Pobieramy głosy oddane przez tego użytkownika z tabeli poll_votes
+  const { data: userVotes } = await db.from('poll_votes').select('poll_id').eq('user_identifier', userId);
+  const votedPollsSet = new Set((userVotes || []).map(v => v.poll_id));
+
+  pollsContainer.innerHTML = polls.map(poll => {
+    const hasVoted = votedPollsSet.has(poll.id) || localStorage.getItem('voted_poll_' + poll.id) === 'true';
+    const options = poll.options || [];
+    const totalVotes = options.reduce((sum, opt) => sum + (opt.votes || 0), 0);
+
+    return `
+      <article class="card" style="padding: 24px;">
+        <h3>${e(poll.question)}</h3>
+        <p class="note" style="margin-bottom: 16px;">Łącznie głosów: ${totalVotes}</p>
+        <div style="display: grid; gap: 10px;">
+          ${options.map((opt, idx) => {
+            const percent = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+            return `
+              <div>
+                <button class="btn o" style="width: 100%; text-align: left; justify-content: space-between; display: flex; align-items: center;" 
+                  ${hasVoted ? 'disabled style="opacity: 0.8; cursor: default;"' : `onclick="vote(${poll.id}, ${idx})"`}>
+                  <span>${e(opt.text)}</span>
+                  <span>${hasVoted ? `${opt.votes} głosów (${percent}%)` : 'Zagłosuj'}</span>
+                </button>
+                ${hasVoted ? `<div style="background: var(--t); height: 6px; width: 100%; margin-top: 4px; border-radius: 3px; overflow: hidden;"><div style="background: var(--l); height: 100%; width: ${percent}%;"></div></div>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+        ${hasVoted ? `<p class="note" style="margin-top: 12px; color: var(--l); font-weight: 700;">✓ Twój głos został zarejestrowany.</p>` : ''}
+      </article>
+    `;
+  }).join('');
+}
+
+async function vote(pollId, optionIndex) {
+  if (localStorage.getItem('voted_poll_' + pollId) === 'true') {
+    alert("Już oddałeś głos w tej ankiecie!");
+    return;
+  }
+
+  // Zapis głosu w bazie danych
+  const { error: voteError } = await db.from('poll_votes').insert([{
+    poll_id: pollId,
+    user_identifier: userId
+  }]);
+
+  if (voteError) {
+    alert("Wygląda na to, że w tej ankiecie oddano już głos z tego urządzenia.");
+    localStorage.setItem('voted_poll_' + pollId, 'true');
+    loadPolls();
+    return;
+  }
+
+  // Pobranie aktualnych opcji, aktualizacja liczników i zapis
+  const { data: pollData, error: fetchError } = await db.from('polls').select('options').eq('id', pollId).single();
+  if (fetchError) return;
+
+  let options = pollData.options || [];
+  if (options[optionIndex]) {
+    options[optionIndex].votes = (options[optionIndex].votes || 0) + 1;
+  }
+
+  const { error: updateError } = await db.from('polls').update({ options: options }).eq('id', pollId);
+
+  if (!updateError) {
+    localStorage.setItem('voted_poll_' + pollId, 'true');
+    loadPolls();
+  }
+}
+
+loadPolls();
+</script>
+</body>
+</html>
