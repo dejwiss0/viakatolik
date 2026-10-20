@@ -156,7 +156,7 @@ async function vote(pollId, optionIndex) {
   }
 }
 
-// Funkcja generująca grafikę na Instagram Story (Canvas 1080x1920)
+// Poprawiona funkcja generująca grafikę na Instagram Story (Canvas 1080x1920)
 function generateStoryImage(pollId, question, optionsEncoded) {
   const options = JSON.parse(decodeURIComponent(optionsEncoded));
   const totalVotes = options.reduce((sum, o) => sum + (o.votes || 0), 0);
@@ -166,7 +166,7 @@ function generateStoryImage(pollId, question, optionsEncoded) {
   canvas.height = 1920;
   const ctx = canvas.getContext('2d');
 
-  // Tło (główny kolor ciemny --d: #1E1740 lub zbliżony motyw)
+  // Tło
   ctx.fillStyle = '#1E1740';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -193,23 +193,32 @@ function generateStoryImage(pollId, question, optionsEncoded) {
     ctx.roundRect(80, startY, 920, 120, 16);
     ctx.fill();
 
-    // Wypełnienie paska postępu %
-    ctx.fillStyle = '#A576FF';
-    ctx.beginPath();
-    ctx.roundRect(80, startY, (920 * percent) / 100, 120, 16);
-    ctx.fill();
+    // Wypełnienie paska postępu % (tylko jeśli > 0%)
+    if (percent > 0) {
+      ctx.fillStyle = '#A576FF';
+      ctx.beginPath();
+      ctx.roundRect(80, startY, (920 * percent) / 100, 120, 16);
+      ctx.fill();
+    }
 
-    // Tekst opcji
+    // Skracanie bardzo długich tekstów opcji
+    let optionText = String(opt.text || '');
+    if (optionText.length > 30) {
+      optionText = optionText.substring(0, 28) + '...';
+    }
+
+    // Tekst opcji po lewej
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 34px Montserrat, sans-serif';
-    ctx.fillText(opt.text, 120, startY + 72);
+    ctx.font = 'bold 32px Montserrat, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(optionText, 110, startY + 72);
     
-    // Wynik procentowy i liczba głosów
+    // Wynik procentowy i liczba głosów po prawej
     ctx.textAlign = 'right';
-    ctx.fillText(`${percent}% (${opt.votes})`, 960, startY + 72);
+    ctx.fillText(`${percent}% (${opt.votes || 0})`, 960, startY + 72);
     ctx.textAlign = 'left';
 
-    startY += 160;
+    startY += 150;
   });
 
   // Stopka / Branding
