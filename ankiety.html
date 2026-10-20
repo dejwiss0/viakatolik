@@ -156,9 +156,8 @@ async function vote(pollId, optionIndex) {
   }
 }
 
-// Poprawiona funkcja generująca grafikę na Instagram Story (Canvas 1080x1920)
+// Poprawiona funkcja generująca i pobierająca grafikę na Instagram Story
 function generateStoryImage(pollId) {
-  // Szukamy ankiety po ID w załadowanej tablicy polls
   const poll = polls.find(p => p.id === pollId);
   if (!poll) {
     alert("Nie znaleziono danych ankiety.");
@@ -196,21 +195,15 @@ function generateStoryImage(pollId) {
   options.forEach((opt) => {
     const votesCount = Number(opt.votes) || 0;
     const percent = totalVotes > 0 ? Math.round((votesCount / totalVotes) * 100) : 0;
-    
-    // Pobieramy tekst niezależnie od tego, jak nazywa się klucz w bazie
     const rawText = String(opt.text || opt.option || opt.label || '');
 
-    // Tło ramki
-    ctx.fillStyle = '#2A2255';
-    ctx.roundRect(80, startY, 920, 120, 16);
-    ctx.fill();
+    // Rysowanie tła ramki opcji (bezpieczne prostokąty z zaokrąglonymi rogami)
+    drawRoundedRect(ctx, 80, startY, 920, 120, 16, '#2A2255');
 
-    // Wypełnienie paska postępu %
+    // Wypełnienie paska postępu % (tylko dla > 0%)
     if (percent > 0) {
-      ctx.fillStyle = '#A576FF';
-      ctx.beginPath();
-      ctx.roundRect(80, startY, (920 * percent) / 100, 120, 16);
-      ctx.fill();
+      const fillWidth = Math.max(40, (920 * percent) / 100);
+      drawRoundedRect(ctx, 80, startY, fillWidth, 120, 16, '#A576FF');
     }
 
     // Dynamiczny rozmiar czcionki dla długich tekstów
@@ -238,11 +231,22 @@ function generateStoryImage(pollId) {
   ctx.font = 'bold 36px Montserrat, sans-serif';
   ctx.fillText('VIA KATOLIK • Samorząd Uczniowski', 80, 1780);
 
-  // Pobieranie pliku PNG
+  // Bezpieczne wyzwolenie pobierania pliku
+  const dataURL = canvas.toDataURL('image/png');
   const link = document.createElement('a');
+  link.href = dataURL;
   link.download = `ankieta-${pollId}-wyniki.png`;
-  link.href = canvas.toDataURL('image/png');
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
+}
+
+// Pomocnicza funkcja rysująca bezpieczne zaokrąglone prostokąty na Canvas
+function drawRoundedRect(ctx, x, y, width, height, radius, fillStyle) {
+  ctx.fillStyle = fillStyle;
+  ctx.beginPath();
+  ctx.roundRect(x, y, width, height, radius);
+  ctx.fill();
 }
 
 function wrapText(context, text, x, y, maxWidth, lineHeight) {
